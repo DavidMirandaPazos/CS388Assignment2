@@ -6,33 +6,77 @@ public class ActionSelector : MonoBehaviour
 {
     GameObject hitObject;
 
+    ActionTrigger lastObjectTriggered;
+
+    public Material selectedMaterial;
+    public Material triggeredMaterial;
+
     float hitTime = 0.0f;
+
+    const float maxDistance = 200.0f;
+    LayerMask layerMask;
+
+    void Start()
+    {
+        layerMask = LayerMask.GetMask("Default");
+    }
 
     // Update is called once per frame
     void Update()
     {
-        RaycastHit hit;
-        Physics.Raycast(new Ray(transform.position, transform.forward), out hit, 200);
-
-        if (hit.collider != null && hit.collider.gameObject == hitObject)
+        // Before doing anything else, check that we are not locked while something
+        // is triggered
+        if (lastObjectTriggered == null || lastObjectTriggered.finished)
         {
-            if (hitObject.GetComponent<ActionTrigger>() != null)
+            // Take the default layer
+            RaycastHit hit;
+            Physics.Raycast(new Ray(transform.position, transform.forward), out hit, maxDistance, layerMask);
+
+            // Check that the raycast did hit something and that it is the same
+            // as the previous hit
+            if (hit.collider != null && hit.collider.gameObject == hitObject)
             {
-                if (hitTime >= 3.0f)
+                ActionTrigger actionTrigger = hitObject.GetComponent<ActionTrigger>();
+                // Check that the hit object has the ActionTrigger component
+                if (actionTrigger != null)
                 {
-                    hitObject.GetComponent<ActionTrigger>().Trigger();
-                    hitTime = 0.0f;
-                }
+                    // If it has been hit for more than three seconds, trigger it
+                    if (hitTime >= 3.0f)
+                    {
+                        actionTrigger.Trigger();
 
-                hitTime += Time.deltaTime;
-                Debug.Log("Updating Time");
+                        if (lastObjectTriggered != null)
+                            lastObjectTriggered.Reset();
+
+                        lastObjectTriggered = actionTrigger;
+                        hitTime = 0.0f;
+                        hitObject.GetComponent<MeshRenderer>().material = triggeredMaterial;
+                    }
+                    else
+                        hitObject.GetComponent<MeshRenderer>().material = selectedMaterial;
+
+                    hitTime += Time.deltaTime;
+                    Debug.Log("Updating Time");
+                }
             }
-        }
-        else if (hit.collider != null && hit.collider.gameObject != hitObject)
-        {
-            hitObject = hit.collider.gameObject;
-            hitTime = 0.0f;
-            Debug.Log("Updated HIT object.");
+            // Check that the raycast did hit something and that it is different from
+            // the previous object hit
+            else if (hit.collider != null && hit.collider.gameObject != hitObject)
+            {
+                hitObject = hit.collider.gameObject;
+
+                hitTime = 0.0f;
+                Debug.Log("Updated HIT object.");
+            }
+            // We did not hit anything, but in the previous check we had hit something
+            else if(hit.collider == null && hitObject != null)
+            {
+                Debug.Log("Nothing hit");
+                // Check that we already had hit something
+                // If that is the case, reset its color
+                if (hitObject != null && hitObject.GetComponent<ActionTrigger>() != null)
+                    hitObject.GetComponent<MeshRenderer>().material = hitObject.GetComponent<ActionTrigger>().defaultMaterial;
+            }
         }
     }
 }
