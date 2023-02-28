@@ -11,6 +11,7 @@ public class PickUpKey : ActionTrigger
         defaultMaterial = gameObject.GetComponent<MeshRenderer>().material;
         doorReference.Unlock();
         finished = true;
+        Destroy(gameObject); 
     }
 
     public override void Reset()
