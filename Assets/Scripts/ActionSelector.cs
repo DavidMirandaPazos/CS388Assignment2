@@ -63,6 +63,11 @@ public class ActionSelector : MonoBehaviour
             // the previous object hit
             else if (hit.collider != null && hit.collider.gameObject != hitObject)
             {
+                // Check that we already had hit something
+                // If that is the case, reset its color
+                if (hitObject != null && hitObject.GetComponent<ActionTrigger>() != null)
+                    hitObject.GetComponent<MeshRenderer>().material = hitObject.GetComponent<ActionTrigger>().defaultMaterial;
+
                 hitObject = hit.collider.gameObject;
 
                 hitTime = 0.0f;

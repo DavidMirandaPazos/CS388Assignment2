@@ -9,6 +9,7 @@ public class PickUpKey : ActionTrigger
     public override void Trigger()
     {
         doorReference.Unlock();
+        finished = true;
     }
 
     public override void Reset()
