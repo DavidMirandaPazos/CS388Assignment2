@@ -5,9 +5,12 @@ using UnityEngine.SceneManagement;
 
 public class WinCollider : MonoBehaviour
 {
+    public Fade fader;
+
     private void OnTriggerEnter(Collider other)
     {
-        SceneManager.LoadScene("03_LogoScreen", LoadSceneMode.Single);
+        fader.FadeOut(0);
+
     }
 
     // Start is called before the first frame update
