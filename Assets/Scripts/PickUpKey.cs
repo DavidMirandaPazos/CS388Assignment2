@@ -8,6 +8,7 @@ public class PickUpKey : ActionTrigger
 
     public override void Trigger()
     {
+        defaultMaterial = gameObject.GetComponent<MeshRenderer>().material;
         doorReference.Unlock();
         finished = true;
     }
